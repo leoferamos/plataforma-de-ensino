@@ -25,14 +25,6 @@ class ProfessorFrame(customtkinter.CTkFrame):
         self.siape_entry = customtkinter.CTkEntry(form_frame)
         self.siape_entry.grid(row=0, column=3, padx=5, pady=5)
 
-        customtkinter.CTkLabel(form_frame, text="Cursos:").grid(row=1, column=0, padx=5, pady=5)
-        self.curso_vars = []
-        for i, curso in enumerate(self.cursos):
-            var = customtkinter.BooleanVar()
-            chk = customtkinter.CTkCheckBox(form_frame, text=f"{curso.nome} (ID: {curso.id})", variable=var)
-            chk.grid(row=1, column=1+i, padx=2, pady=5)
-            self.curso_vars.append((curso.id, var))
-
         customtkinter.CTkLabel(form_frame, text="Email:").grid(row=1, column=0, padx=5, pady=5)
         self.email_entry = customtkinter.CTkEntry(form_frame)
         self.email_entry.grid(row=1, column=1, padx=5, pady=5)
@@ -40,6 +32,20 @@ class ProfessorFrame(customtkinter.CTkFrame):
         customtkinter.CTkLabel(form_frame, text="CPF:").grid(row=1, column=2, padx=5, pady=5)
         self.cpf_entry = customtkinter.CTkEntry(form_frame)
         self.cpf_entry.grid(row=1, column=3, padx=5, pady=5)
+
+        # Label para cursos
+        customtkinter.CTkLabel(form_frame, text="Cursos:").grid(row=2, column=0, padx=5, pady=5, sticky="nw")
+
+        # Frame rolável para os cursos
+        self.cursos_scroll = customtkinter.CTkScrollableFrame(form_frame, width=350, height=60)
+        self.cursos_scroll.grid(row=2, column=1, columnspan=3, padx=5, pady=5, sticky="w")
+
+        self.curso_vars = []
+        for i, curso in enumerate(self.cursos):
+            var = customtkinter.BooleanVar()
+            chk = customtkinter.CTkCheckBox(self.cursos_scroll, text=f"{curso.nome} (ID: {curso.id})", variable=var)
+            chk.grid(row=i // 3, column=i % 3, padx=2, pady=2, sticky="w")
+            self.curso_vars.append((curso.id, var))
 
         self.add_btn = customtkinter.CTkButton(form_frame, text="Adicionar", command=self.adicionar_ou_salvar_professor)
         self.add_btn.grid(row=0, column=4, padx=10, pady=5)
