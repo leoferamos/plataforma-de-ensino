@@ -42,3 +42,13 @@ class ProfessorRepository:
         conn.commit()
         cursor.close()
         conn.close()
+
+    def associar_cursos(self, professor_id, cursos_ids):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM curso_professor WHERE professor_id = %s", (professor_id,))
+        for curso_id in cursos_ids:
+            cursor.execute("INSERT INTO curso_professor (curso_id, professor_id) VALUES (%s, %s)", (curso_id, professor_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
