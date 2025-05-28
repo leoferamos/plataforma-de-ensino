@@ -79,7 +79,15 @@ class AlunoFrame(customtkinter.CTkFrame):
         matricula = self.matricula_entry.get()
         email = self.email_entry.get()
         cpf = self.cpf_entry.get()
-        data_nascimento = self.data_nasc_entry.get()
+        # Validação de CPF na interface
+        if cpf:
+            cpf_numeros = ''.join(filter(str.isdigit, cpf))
+            if len(cpf_numeros) != 11:
+                tkinter.messagebox.showerror("Erro", "CPF deve ter exatamente 11 números.")
+                return
+            if not cpf_numeros.isdigit():
+                tkinter.messagebox.showerror("Erro", "CPF deve conter apenas números.")
+                return
         # Validação e conversão do formato
         if data_nascimento:
             try:
