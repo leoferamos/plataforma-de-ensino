@@ -9,7 +9,8 @@ class ProfessorService:
         professor = Professor(nome=nome, siape=siape)
         professor.email = email
         professor.cpf = cpf
-        self.repo.adicionar(professor)
+        professor_id = self.repo.adicionar(professor)
+        professor.id = professor_id  # <-- seta o id no objeto
         return professor
 
     def listar(self):
@@ -28,3 +29,6 @@ class ProfessorService:
 
     def associar_cursos(self, professor_id, cursos_ids):
         self.repo.associar_cursos(professor_id, cursos_ids)
+
+    def get_cursos_ids(self, professor_id):
+        return self.repo.get_cursos_ids(professor_id)
