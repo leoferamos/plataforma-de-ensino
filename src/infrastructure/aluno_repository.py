@@ -5,8 +5,8 @@ class AlunoRepository:
     def adicionar(self, aluno: Aluno):
         conn = get_connection()
         cursor = conn.cursor()
-        sql = "INSERT INTO aluno (nome, matricula, email, cpf, data_nascimento) VALUES (%s, %s, %s, %s, %s)"
-        cursor.execute(sql, (aluno.nome, aluno.matricula, getattr(aluno, 'email', None), getattr(aluno, 'cpf', None), getattr(aluno, 'data_nascimento', None)))
+        sql = "INSERT INTO aluno (nome, matricula, email, cpf, data_nascimento, turma_id) VALUES (%s, %s, %s, %s, %s, %s)"
+        cursor.execute(sql, (aluno.nome, aluno.matricula, getattr(aluno, 'email', None), getattr(aluno, 'cpf', None), getattr(aluno, 'data_nascimento', None), aluno.turma_id))
         conn.commit()
         cursor.close()
         conn.close()
@@ -14,10 +14,10 @@ class AlunoRepository:
     def listar(self):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT id, nome, matricula, email, cpf, data_nascimento FROM aluno")
+        cursor.execute("SELECT id, nome, matricula, email, cpf, data_nascimento, turma_id FROM aluno")
         alunos = []
         for row in cursor.fetchall():
-            aluno = Aluno(nome=row[1], matricula=row[2])
+            aluno = Aluno(nome=row[1], matricula=row[2], turma_id=row[6])
             aluno.id = row[0]
             aluno.email = row[3]
             aluno.cpf = row[4]
