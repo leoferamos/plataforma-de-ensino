@@ -17,11 +17,15 @@ class AlunoRepository:
         cursor.execute("SELECT id, nome, matricula, email, cpf, data_nascimento, turma_id FROM aluno")
         alunos = []
         for row in cursor.fetchall():
-            aluno = Aluno(nome=row[1], matricula=row[2], turma_id=row[6])
-            aluno.id = row[0]
-            aluno.email = row[3]
-            aluno.cpf = row[4]
-            aluno.data_nascimento = row[5]
+            aluno = Aluno(
+                nome=row[1],
+                matricula=row[2],
+                email=row[3],
+                cpf=row[4],
+                data_nascimento=row[5],
+                turma_id=row[6],
+                id=row[0]
+            )
             alunos.append(aluno)
         cursor.close()
         conn.close()

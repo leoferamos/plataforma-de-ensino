@@ -17,8 +17,11 @@ class CursoRepository:
         cursor.execute("SELECT id, nome, codigo FROM curso")
         cursos = []
         for row in cursor.fetchall():
-            curso = Curso(nome=row[1], codigo=row[2])
-            curso.id = row[0]
+            curso = Curso(
+                nome=row[1],
+                codigo=row[2],
+                id=row[0]
+            )
             cursos.append(curso)
         cursor.close()
         conn.close()

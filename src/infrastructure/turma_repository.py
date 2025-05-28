@@ -17,9 +17,12 @@ class TurmaRepository:
         cursor.execute("SELECT id, nome, codigo, curso_id FROM turma")
         turmas = []
         for row in cursor.fetchall():
-            turma = Turma(nome=row[1], codigo=row[2])
-            turma.id = row[0]
-            turma.curso_id = row[3]
+            turma = Turma(
+                nome=row[1],
+                codigo=row[2],
+                curso_id=row[3],
+                id=row[0]
+            )
             turmas.append(turma)
         cursor.close()
         conn.close()

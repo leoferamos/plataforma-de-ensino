@@ -19,10 +19,13 @@ class ProfessorRepository:
         cursor.execute("SELECT id, nome, siape, email, cpf FROM professor")
         professores = []
         for row in cursor.fetchall():
-            professor = Professor(nome=row[1], siape=row[2])
-            professor.id = row[0]
-            professor.email = row[3]
-            professor.cpf = row[4]
+            professor = Professor(
+                nome=row[1],
+                siape=row[2],
+                email=row[3],
+                cpf=row[4],
+                id=row[0]
+            )
             professores.append(professor)
         cursor.close()
         conn.close()
