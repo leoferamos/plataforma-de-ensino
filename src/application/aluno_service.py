@@ -1,15 +1,19 @@
 from infrastructure.aluno_repository import AlunoRepository
 from domain.aluno import Aluno
+import datetime
 
 class AlunoService:
     def __init__(self):
         self.repo = AlunoRepository()
 
     def cadastrar(self, nome, matricula, email=None, cpf=None, data_nascimento=None, turma_id=None):
-        aluno = Aluno(nome=nome, matricula=matricula, turma_id=turma_id)
-        aluno.email = email
-        aluno.cpf = cpf
-        aluno.data_nascimento = data_nascimento
+        # Validação da data
+        if data_nascimento:
+            try:
+                datetime.datetime.strptime(data_nascimento, "%Y-%m-%d")
+            except ValueError:
+                raise ValueError("Data de nascimento inválida! Use o formato YYYY-MM-DD.")
+        aluno = Aluno(nome=nome, matricula=matricula, email=email, cpf=cpf, data_nascimento=data_nascimento, turma_id=turma_id)
         self.repo.adicionar(aluno)
         return aluno
 
