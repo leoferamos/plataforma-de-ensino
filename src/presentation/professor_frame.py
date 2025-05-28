@@ -1,11 +1,14 @@
 import customtkinter
 from application.professor_service import ProfessorService
+from application.curso_service import CursoService
 
 class ProfessorFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
         self.service = ProfessorService()
+        self.curso_service = CursoService()
         self.professores = self.service.listar()
+        self.cursos = self.curso_service.listar()
         self.editando_id = None
 
         label = customtkinter.CTkLabel(self, text="Gestão de Professores", font=customtkinter.CTkFont(size=18, weight="bold"))
@@ -22,6 +25,14 @@ class ProfessorFrame(customtkinter.CTkFrame):
         self.siape_entry = customtkinter.CTkEntry(form_frame)
         self.siape_entry.grid(row=0, column=3, padx=5, pady=5)
 
+        customtkinter.CTkLabel(form_frame, text="Cursos:").grid(row=1, column=0, padx=5, pady=5)
+        self.curso_vars = []
+        for i, curso in enumerate(self.cursos):
+            var = customtkinter.BooleanVar()
+            chk = customtkinter.CTkCheckBox(form_frame, text=f"{curso.nome} (ID: {curso.id})", variable=var)
+            chk.grid(row=1, column=1+i, padx=2, pady=5)
+            self.curso_vars.append((curso.id, var))
+
         self.add_btn = customtkinter.CTkButton(form_frame, text="Adicionar", command=self.adicionar_ou_salvar_professor)
         self.add_btn.grid(row=0, column=4, padx=10, pady=5)
 
@@ -34,14 +45,19 @@ class ProfessorFrame(customtkinter.CTkFrame):
         siape = self.siape_entry.get()
         if not nome or not siape:
             return
+        cursos_ids = [cid for cid, var in self.curso_vars if var.get()]
         if self.editando_id is None:
-            self.service.cadastrar(nome, siape)
+            prof = self.service.cadastrar(nome, siape)
+            self.service.associar_cursos(prof.id, cursos_ids)
         else:
             self.service.atualizar(self.editando_id, nome, siape)
+            self.service.associar_cursos(self.editando_id, cursos_ids)
             self.editando_id = None
             self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.siape_entry.delete(0, "end")
+        for _, var in self.curso_vars:
+            var.set(False)
         self.atualizar_lista()
 
     def editar_professor(self, professor_id):
