@@ -82,17 +82,19 @@ class ProfessorFrame(customtkinter.CTkFrame):
         for widget in self.lista_frame.winfo_children():
             widget.destroy()
         self.professores = self.service.listar()
-        if not self.professores:
-            customtkinter.CTkLabel(self.lista_frame, text="Nenhum professor cadastrado.").pack()
-        else:
-            for professor in self.professores:
-                row_frame = customtkinter.CTkFrame(self.lista_frame)
-                row_frame.pack(fill="x", padx=5, pady=2)
-                text = f"{professor.nome} (SIAPE: {professor.siape})"
-                customtkinter.CTkLabel(row_frame, text=text).pack(side="left", padx=10)
-                edit_btn = customtkinter.CTkButton(row_frame, text="Editar", width=80,
-                                                   command=lambda i=professor.id: self.editar_professor(i))
-                edit_btn.pack(side="right", padx=5)
-                del_btn = customtkinter.CTkButton(row_frame, text="Excluir", width=80, fg_color="red",
-                                                  command=lambda i=professor.id: self.excluir_professor(i))
-                del_btn.pack(side="right", padx=5)
+        self.cursos = self.curso_service.listar()
+        for professor in self.professores:
+            # Buscar cursos associados a este professor
+            cursos_ids = self.service.get_cursos_ids(professor.id)  # Você vai criar esse método
+            cursos_nomes = [c.nome for c in self.cursos if c.id in cursos_ids]
+            cursos_str = ", ".join(cursos_nomes) if cursos_nomes else "Nenhum curso"
+            text = f"{professor.nome} (SIAPE: {professor.siape}) - Cursos: {cursos_str}"
+            row_frame = customtkinter.CTkFrame(self.lista_frame)
+            row_frame.pack(fill="x", padx=5, pady=2)
+            customtkinter.CTkLabel(row_frame, text=text).pack(side="left", padx=10)
+            edit_btn = customtkinter.CTkButton(row_frame, text="Editar", width=80,
+                                               command=lambda i=professor.id: self.editar_professor(i))
+            edit_btn.pack(side="right", padx=5)
+            del_btn = customtkinter.CTkButton(row_frame, text="Excluir", width=80, fg_color="red",
+                                              command=lambda i=professor.id: self.excluir_professor(i))
+            del_btn.pack(side="right", padx=5)
