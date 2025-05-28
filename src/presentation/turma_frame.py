@@ -65,7 +65,12 @@ class TurmaFrame(customtkinter.CTkFrame):
             self.nome_entry.insert(0, turma.nome)
             self.codigo_entry.delete(0, "end")
             self.codigo_entry.insert(0, turma.codigo)
-            self.curso_var.set(f"{turma.curso.nome} (ID: {turma.curso_id})" if turma.curso_id is not None else "")
+            curso_nome = ""
+            if turma.curso_id is not None:
+                curso = next((c for c in self.cursos if c.id == turma.curso_id), None)
+                if curso:
+                    curso_nome = f"{curso.nome} (ID: {curso.id})"
+            self.curso_var.set(curso_nome)
             self.editando_id = turma_id
             self.add_btn.configure(text="Salvar")
 
@@ -87,10 +92,11 @@ class TurmaFrame(customtkinter.CTkFrame):
         else:
             for turma in self.turmas:
                 curso_nome = ""
-                if turma.curso_id:
+                if turma.curso_id is not None:
                     curso = next((c for c in self.cursos if c.id == turma.curso_id), None)
                     if curso:
-                        curso_nome = f" - Curso: {curso.nome} (ID: {curso.id})"
+                        curso_nome = f"{curso.nome} (ID: {curso.id})"
+                self.curso_var.set(curso_nome)
                 text = f"{turma.nome} (Código: {turma.codigo}){curso_nome}"
                 row_frame = customtkinter.CTkFrame(self.lista_frame)
                 row_frame.pack(fill="x", padx=5, pady=2)
