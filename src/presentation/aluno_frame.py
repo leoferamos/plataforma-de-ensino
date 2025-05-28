@@ -79,6 +79,7 @@ class AlunoFrame(customtkinter.CTkFrame):
         matricula = self.matricula_entry.get()
         email = self.email_entry.get()
         cpf = self.cpf_entry.get()
+        data_nascimento = self.data_nasc_entry.get()
         # Validação de CPF na interface
         if cpf:
             cpf_numeros = ''.join(filter(str.isdigit, cpf))

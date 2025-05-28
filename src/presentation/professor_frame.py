@@ -1,5 +1,6 @@
 import customtkinter
 import tkinter.messagebox
+import re
 from application.professor_service import ProfessorService
 from application.curso_service import CursoService
 
@@ -68,6 +69,11 @@ class ProfessorFrame(customtkinter.CTkFrame):
                 return
             if not cpf_numeros.isdigit():
                 tkinter.messagebox.showerror("Erro", "CPF deve conter apenas números.")
+                return
+        # Validação de email
+        if email:
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                tkinter.messagebox.showerror("Erro", "Email inválido.")
                 return
         cursos_ids = [cid for cid, var in self.curso_vars if var.get()]
         try:
