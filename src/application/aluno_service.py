@@ -5,8 +5,8 @@ class AlunoService:
     def __init__(self):
         self.repo = AlunoRepository()
 
-    def cadastrar(self, nome, matricula, email=None, cpf=None, data_nascimento=None):
-        aluno = Aluno(nome=nome, matricula=matricula)
+    def cadastrar(self, nome, matricula, email=None, cpf=None, data_nascimento=None, turma_id=None):
+        aluno = Aluno(nome=nome, matricula=matricula, turma_id=turma_id)
         aluno.email = email
         aluno.cpf = cpf
         aluno.data_nascimento = data_nascimento
