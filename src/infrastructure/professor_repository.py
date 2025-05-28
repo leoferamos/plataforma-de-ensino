@@ -8,8 +8,10 @@ class ProfessorRepository:
         sql = "INSERT INTO professor (nome, siape, email, cpf) VALUES (%s, %s, %s, %s)"
         cursor.execute(sql, (professor.nome, professor.siape, getattr(professor, 'email', None), getattr(professor, 'cpf', None)))
         conn.commit()
+        professor_id = cursor.lastrowid  # <-- pega o id gerado
         cursor.close()
         conn.close()
+        return professor_id
 
     def listar(self):
         conn = get_connection()
@@ -52,3 +54,12 @@ class ProfessorRepository:
         conn.commit()
         cursor.close()
         conn.close()
+
+    def get_cursos_ids(self, professor_id):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT curso_id FROM curso_professor WHERE professor_id = %s", (professor_id,))
+        ids = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+        conn.close()
+        return ids
