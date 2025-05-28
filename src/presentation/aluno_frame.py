@@ -1,6 +1,10 @@
 import customtkinter
 from application.aluno_service import AlunoService
 from application.turma_service import TurmaService
+import datetime
+import tkinter.messagebox
+import tkinter as tk
+import re
 
 class AlunoFrame(customtkinter.CTkFrame):
     def __init__(self, master):
@@ -36,6 +40,7 @@ class AlunoFrame(customtkinter.CTkFrame):
         customtkinter.CTkLabel(form_frame, text="Data Nasc.:").grid(row=1, column=4, padx=5, pady=5)
         self.data_nasc_entry = customtkinter.CTkEntry(form_frame)
         self.data_nasc_entry.grid(row=1, column=5, padx=5, pady=5)
+        self.data_nasc_entry.bind("<KeyRelease>", self.on_data_nasc_keyrelease)
 
         customtkinter.CTkLabel(form_frame, text="Turma:").grid(row=0, column=4, padx=5, pady=5)
         self.turma_var = customtkinter.StringVar()
@@ -50,12 +55,38 @@ class AlunoFrame(customtkinter.CTkFrame):
         self.lista_frame.pack(padx=20, pady=10, fill="both", expand=True)
         self.atualizar_lista()
 
+    def on_data_nasc_keyrelease(self, event):
+        texto = self.data_nasc_entry.get()
+        # Remove tudo que não for número
+        numeros = re.sub(r'\D', '', texto)
+        # Limita a 8 dígitos (DDMMAAAA)
+        numeros = numeros[:8]
+        # Monta a string formatada
+        formatada = ""
+        if len(numeros) > 0:
+            formatada += numeros[:2]
+        if len(numeros) > 2:
+            formatada += "/" + numeros[2:4]
+        if len(numeros) > 4:
+            formatada += "/" + numeros[4:8]
+        # Evita loop infinito de eventos
+        if texto != formatada:
+            self.data_nasc_entry.delete(0, "end")
+            self.data_nasc_entry.insert(0, formatada)
+
     def adicionar_ou_salvar_aluno(self):
         nome = self.nome_entry.get()
         matricula = self.matricula_entry.get()
         email = self.email_entry.get()
         cpf = self.cpf_entry.get()
         data_nascimento = self.data_nasc_entry.get()
+        # Validação da data
+        try:
+            if data_nascimento:
+                datetime.datetime.strptime(data_nascimento, "%Y-%m-%d")
+        except ValueError:
+            tkinter.messagebox.showerror("Erro", "Data de nascimento inválida! Use o formato YYYY-MM-DD.")
+            return
         turma_nome = self.turma_var.get()
         turma_id = None
         for t in self.turmas:
