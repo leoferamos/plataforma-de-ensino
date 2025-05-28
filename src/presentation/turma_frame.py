@@ -81,13 +81,19 @@ class TurmaFrame(customtkinter.CTkFrame):
         for widget in self.lista_frame.winfo_children():
             widget.destroy()
         self.turmas = self.service.listar()
+        self.cursos = self.curso_service.listar()
         if not self.turmas:
             customtkinter.CTkLabel(self.lista_frame, text="Nenhuma turma cadastrada.").pack()
         else:
             for turma in self.turmas:
+                curso_nome = ""
+                if turma.curso_id:
+                    curso = next((c for c in self.cursos if c.id == turma.curso_id), None)
+                    if curso:
+                        curso_nome = f" - Curso: {curso.nome} (ID: {curso.id})"
+                text = f"{turma.nome} (Código: {turma.codigo}){curso_nome}"
                 row_frame = customtkinter.CTkFrame(self.lista_frame)
                 row_frame.pack(fill="x", padx=5, pady=2)
-                text = f"{turma.nome} (Código: {turma.codigo}, Curso ID: {turma.curso_id})"
                 customtkinter.CTkLabel(row_frame, text=text).pack(side="left", padx=10)
                 edit_btn = customtkinter.CTkButton(row_frame, text="Editar", width=80,
                                                    command=lambda i=turma.id: self.editar_turma(i))
