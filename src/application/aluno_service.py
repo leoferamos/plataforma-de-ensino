@@ -1,6 +1,7 @@
 from infrastructure.aluno_repository import AlunoRepository
 from domain.aluno import Aluno
 import datetime
+import re
 
 class AlunoService:
     def __init__(self):
@@ -19,6 +20,9 @@ class AlunoService:
         return False
 
     def cadastrar(self, nome, matricula, email=None, cpf=None, data_nascimento=None, turma_id=None):
+        if email:
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                raise ValueError("Email inválido.")
         if cpf:
             cpf_numeros = ''.join(filter(str.isdigit, cpf))
             if len(cpf_numeros) != 11:
@@ -44,6 +48,9 @@ class AlunoService:
         self.repo.remover(aluno_id)
 
     def atualizar(self, aluno_id, nome, matricula, email=None, cpf=None, data_nascimento=None):
+        if email:
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                raise ValueError("Email inválido.")
         if cpf:
             cpf_numeros = ''.join(filter(str.isdigit, cpf))
             if len(cpf_numeros) != 11:

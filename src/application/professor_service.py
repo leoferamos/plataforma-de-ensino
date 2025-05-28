@@ -1,5 +1,6 @@
 from infrastructure.professor_repository import ProfessorRepository
 from domain.professor import Professor
+import re
 
 class ProfessorService:
     def __init__(self):
@@ -18,6 +19,9 @@ class ProfessorService:
         return False
 
     def cadastrar(self, nome, siape, email=None, cpf=None):
+        if email:
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                raise ValueError("Email inválido.")
         if cpf:
             cpf_numeros = ''.join(filter(str.isdigit, cpf))
             if len(cpf_numeros) != 11:
@@ -38,6 +42,9 @@ class ProfessorService:
         self.repo.remover(professor_id)
 
     def atualizar(self, professor_id, nome, siape, email=None, cpf=None):
+        if email:
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                raise ValueError("Email inválido.")
         if cpf:
             cpf_numeros = ''.join(filter(str.isdigit, cpf))
             if len(cpf_numeros) != 11:
