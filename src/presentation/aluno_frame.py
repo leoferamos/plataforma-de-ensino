@@ -98,12 +98,16 @@ class AlunoFrame(customtkinter.CTkFrame):
                 turma_id = t.id
         if not nome or not matricula or not turma_id:
             return
-        if self.editando_id is None:
-            self.service.cadastrar(nome, matricula, email, cpf, data_nascimento_db, turma_id)
-        else:
-            self.service.atualizar(self.editando_id, nome, matricula, email, cpf, data_nascimento_db)
-            self.editando_id = None
-            self.add_btn.configure(text="Adicionar")
+        try:
+            if self.editando_id is None:
+                self.service.cadastrar(nome, matricula, email, cpf, data_nascimento_db, turma_id)
+            else:
+                self.service.atualizar(self.editando_id, nome, matricula, email, cpf, data_nascimento_db)
+                self.editando_id = None
+                self.add_btn.configure(text="Adicionar")
+        except ValueError as e:
+            tkinter.messagebox.showerror("Erro", str(e))
+            return
         self.nome_entry.delete(0, "end")
         self.matricula_entry.delete(0, "end")
         self.email_entry.delete(0, "end")

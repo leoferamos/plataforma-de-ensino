@@ -1,4 +1,5 @@
 import customtkinter
+import tkinter.messagebox
 from application.professor_service import ProfessorService
 from application.curso_service import CursoService
 
@@ -60,16 +61,18 @@ class ProfessorFrame(customtkinter.CTkFrame):
         email = self.email_entry.get()
         cpf = self.cpf_entry.get()
         cursos_ids = [cid for cid, var in self.curso_vars if var.get()]
-        if not nome or not siape:
+        try:
+            if self.editando_id is None:
+                prof = self.service.cadastrar(nome, siape, email, cpf)
+                self.service.associar_cursos(prof.id, cursos_ids)
+            else:
+                self.service.atualizar(self.editando_id, nome, siape, email, cpf)
+                self.service.associar_cursos(self.editando_id, cursos_ids)
+                self.editando_id = None
+                self.add_btn.configure(text="Adicionar")
+        except ValueError as e:
+            tkinter.messagebox.showerror("Erro", str(e))
             return
-        if self.editando_id is None:
-            prof = self.service.cadastrar(nome, siape, email, cpf)
-            self.service.associar_cursos(prof.id, cursos_ids)
-        else:
-            self.service.atualizar(self.editando_id, nome, siape, email, cpf)
-            self.service.associar_cursos(self.editando_id, cursos_ids)
-            self.editando_id = None
-            self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.siape_entry.delete(0, "end")
         self.email_entry.delete(0, "end")
