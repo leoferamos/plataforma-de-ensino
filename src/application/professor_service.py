@@ -18,6 +18,12 @@ class ProfessorService:
         return False
 
     def cadastrar(self, nome, siape, email=None, cpf=None):
+        if cpf:
+            cpf_numeros = ''.join(filter(str.isdigit, cpf))
+            if len(cpf_numeros) != 11:
+                raise ValueError("CPF deve ter exatamente 11 números.")
+            if not cpf_numeros.isdigit():
+                raise ValueError("CPF deve conter apenas números.")
         if cpf and self.cpf_existe(cpf):
             raise ValueError("CPF já cadastrado para outro professor ou aluno.")
         professor = Professor(nome=nome, siape=siape, email=email, cpf=cpf)
@@ -32,6 +38,12 @@ class ProfessorService:
         self.repo.remover(professor_id)
 
     def atualizar(self, professor_id, nome, siape, email=None, cpf=None):
+        if cpf:
+            cpf_numeros = ''.join(filter(str.isdigit, cpf))
+            if len(cpf_numeros) != 11:
+                raise ValueError("CPF deve ter exatamente 11 números.")
+            if not cpf_numeros.isdigit():
+                raise ValueError("CPF deve conter apenas números.")
         if cpf and self.cpf_existe(cpf, ignorar_id=professor_id):
             raise ValueError("CPF já cadastrado para outro professor ou aluno.")
         professor = Professor(nome=nome, siape=siape, email=email, cpf=cpf, id=professor_id)

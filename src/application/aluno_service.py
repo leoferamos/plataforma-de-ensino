@@ -19,6 +19,12 @@ class AlunoService:
         return False
 
     def cadastrar(self, nome, matricula, email=None, cpf=None, data_nascimento=None, turma_id=None):
+        if cpf:
+            cpf_numeros = ''.join(filter(str.isdigit, cpf))
+            if len(cpf_numeros) != 11:
+                raise ValueError("CPF deve ter exatamente 11 números.")
+            if not cpf_numeros.isdigit():
+                raise ValueError("CPF deve conter apenas números.")
         if cpf and self.cpf_existe(cpf):
             raise ValueError("CPF já cadastrado para outro aluno ou professor.")
         # Validação da data
@@ -38,6 +44,12 @@ class AlunoService:
         self.repo.remover(aluno_id)
 
     def atualizar(self, aluno_id, nome, matricula, email=None, cpf=None, data_nascimento=None):
+        if cpf:
+            cpf_numeros = ''.join(filter(str.isdigit, cpf))
+            if len(cpf_numeros) != 11:
+                raise ValueError("CPF deve ter exatamente 11 números.")
+            if not cpf_numeros.isdigit():
+                raise ValueError("CPF deve conter apenas números.")
         if cpf and self.cpf_existe(cpf, ignorar_id=aluno_id):
             raise ValueError("CPF já cadastrado para outro aluno ou professor.")
         aluno = Aluno(nome=nome, matricula=matricula)
