@@ -1,5 +1,6 @@
 import customtkinter
 from application.curso_service import CursoService
+import tkinter.messagebox
 
 class CursoFrame(customtkinter.CTkFrame):
     def __init__(self, master):
@@ -55,12 +56,15 @@ class CursoFrame(customtkinter.CTkFrame):
             self.add_btn.configure(text="Salvar")
 
     def excluir_curso(self, curso_id):
-        self.service.remover(curso_id)
-        self.editando_id = None
-        self.add_btn.configure(text="Adicionar")
-        self.nome_entry.delete(0, "end")
-        self.codigo_entry.delete(0, "end")
-        self.atualizar_lista()
+        try:
+            self.service.remover(curso_id)
+            self.editando_id = None
+            self.add_btn.configure(text="Adicionar")
+            self.nome_entry.delete(0, "end")
+            self.codigo_entry.delete(0, "end")
+            self.atualizar_lista()
+        except ValueError as e:
+            tkinter.messagebox.showerror("Erro", str(e))
 
     def atualizar_lista(self):
         for widget in self.lista_frame.winfo_children():
