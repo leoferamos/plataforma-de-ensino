@@ -25,3 +25,6 @@ class ProfessorService:
         professor.cpf = cpf
         self.repo.atualizar(professor)
         return professor
+
+    def associar_cursos(self, professor_id, cursos_ids):
+        self.repo.associar_cursos(professor_id, cursos_ids)
