@@ -33,6 +33,14 @@ class ProfessorFrame(customtkinter.CTkFrame):
             chk.grid(row=1, column=1+i, padx=2, pady=5)
             self.curso_vars.append((curso.id, var))
 
+        customtkinter.CTkLabel(form_frame, text="Email:").grid(row=1, column=0, padx=5, pady=5)
+        self.email_entry = customtkinter.CTkEntry(form_frame)
+        self.email_entry.grid(row=1, column=1, padx=5, pady=5)
+
+        customtkinter.CTkLabel(form_frame, text="CPF:").grid(row=1, column=2, padx=5, pady=5)
+        self.cpf_entry = customtkinter.CTkEntry(form_frame)
+        self.cpf_entry.grid(row=1, column=3, padx=5, pady=5)
+
         self.add_btn = customtkinter.CTkButton(form_frame, text="Adicionar", command=self.adicionar_ou_salvar_professor)
         self.add_btn.grid(row=0, column=4, padx=10, pady=5)
 
@@ -43,19 +51,23 @@ class ProfessorFrame(customtkinter.CTkFrame):
     def adicionar_ou_salvar_professor(self):
         nome = self.nome_entry.get()
         siape = self.siape_entry.get()
+        email = self.email_entry.get()
+        cpf = self.cpf_entry.get()
+        cursos_ids = [cid for cid, var in self.curso_vars if var.get()]
         if not nome or not siape:
             return
-        cursos_ids = [cid for cid, var in self.curso_vars if var.get()]
         if self.editando_id is None:
-            prof = self.service.cadastrar(nome, siape)
+            prof = self.service.cadastrar(nome, siape, email, cpf)
             self.service.associar_cursos(prof.id, cursos_ids)
         else:
-            self.service.atualizar(self.editando_id, nome, siape)
+            self.service.atualizar(self.editando_id, nome, siape, email, cpf)
             self.service.associar_cursos(self.editando_id, cursos_ids)
             self.editando_id = None
             self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.siape_entry.delete(0, "end")
+        self.email_entry.delete(0, "end")
+        self.cpf_entry.delete(0, "end")
         for _, var in self.curso_vars:
             var.set(False)
         self.atualizar_lista()
@@ -67,6 +79,10 @@ class ProfessorFrame(customtkinter.CTkFrame):
             self.nome_entry.insert(0, professor.nome)
             self.siape_entry.delete(0, "end")
             self.siape_entry.insert(0, professor.siape)
+            self.email_entry.delete(0, "end")
+            self.email_entry.insert(0, professor.email or "")
+            self.cpf_entry.delete(0, "end")
+            self.cpf_entry.insert(0, professor.cpf or "")
             self.editando_id = professor_id
             self.add_btn.configure(text="Salvar")
 
@@ -88,7 +104,12 @@ class ProfessorFrame(customtkinter.CTkFrame):
             cursos_ids = self.service.get_cursos_ids(professor.id)  # Você vai criar esse método
             cursos_nomes = [c.nome for c in self.cursos if c.id in cursos_ids]
             cursos_str = ", ".join(cursos_nomes) if cursos_nomes else "Nenhum curso"
-            text = f"{professor.nome} (SIAPE: {professor.siape}) - Cursos: {cursos_str}"
+            text = (
+                f"{professor.nome} (SIAPE: {professor.siape})"
+                f" | Email: {professor.email or '-'}"
+                f" | CPF: {professor.cpf or '-'}"
+                f" - Cursos: {cursos_str}"
+            )
             row_frame = customtkinter.CTkFrame(self.lista_frame)
             row_frame.pack(fill="x", padx=5, pady=2)
             customtkinter.CTkLabel(row_frame, text=text).pack(side="left", padx=10)
