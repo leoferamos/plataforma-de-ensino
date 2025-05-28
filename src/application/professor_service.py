@@ -5,12 +5,24 @@ class ProfessorService:
     def __init__(self):
         self.repo = ProfessorRepository()
 
+    def cpf_existe(self, cpf, ignorar_id=None):
+        # Verifica em professores
+        for professor in self.repo.listar():
+            if professor.cpf == cpf and (ignorar_id is None or professor.id != ignorar_id):
+                return True
+        # Verifica em alunos
+        from application.aluno_service import AlunoService
+        for aluno in AlunoService().listar():
+            if aluno.cpf == cpf:
+                return True
+        return False
+
     def cadastrar(self, nome, siape, email=None, cpf=None):
-        professor = Professor(nome=nome, siape=siape)
-        professor.email = email
-        professor.cpf = cpf
+        if cpf and self.cpf_existe(cpf):
+            raise ValueError("CPF já cadastrado para outro professor ou aluno.")
+        professor = Professor(nome=nome, siape=siape, email=email, cpf=cpf)
         professor_id = self.repo.adicionar(professor)
-        professor.id = professor_id  # <-- seta o id no objeto
+        professor.id = professor_id
         return professor
 
     def listar(self):
@@ -20,10 +32,9 @@ class ProfessorService:
         self.repo.remover(professor_id)
 
     def atualizar(self, professor_id, nome, siape, email=None, cpf=None):
-        professor = Professor(nome=nome, siape=siape)
-        professor.id = professor_id
-        professor.email = email
-        professor.cpf = cpf
+        if cpf and self.cpf_existe(cpf, ignorar_id=professor_id):
+            raise ValueError("CPF já cadastrado para outro professor ou aluno.")
+        professor = Professor(nome=nome, siape=siape, email=email, cpf=cpf, id=professor_id)
         self.repo.atualizar(professor)
         return professor
 

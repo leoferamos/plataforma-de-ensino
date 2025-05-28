@@ -6,7 +6,21 @@ class AlunoService:
     def __init__(self):
         self.repo = AlunoRepository()
 
+    def cpf_existe(self, cpf, ignorar_id=None):
+        # Verifica em alunos
+        for aluno in self.repo.listar():
+            if aluno.cpf == cpf and (ignorar_id is None or aluno.id != ignorar_id):
+                return True
+        # Verifica em professores
+        from application.professor_service import ProfessorService
+        for professor in ProfessorService().listar():
+            if professor.cpf == cpf:
+                return True
+        return False
+
     def cadastrar(self, nome, matricula, email=None, cpf=None, data_nascimento=None, turma_id=None):
+        if cpf and self.cpf_existe(cpf):
+            raise ValueError("CPF já cadastrado para outro aluno ou professor.")
         # Validação da data
         if data_nascimento:
             try:
@@ -24,6 +38,8 @@ class AlunoService:
         self.repo.remover(aluno_id)
 
     def atualizar(self, aluno_id, nome, matricula, email=None, cpf=None, data_nascimento=None):
+        if cpf and self.cpf_existe(cpf, ignorar_id=aluno_id):
+            raise ValueError("CPF já cadastrado para outro aluno ou professor.")
         aluno = Aluno(nome=nome, matricula=matricula)
         aluno.id = aluno_id
         aluno.email = email
