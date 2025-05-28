@@ -1,4 +1,5 @@
 import customtkinter
+import tkinter.messagebox
 from application.turma_service import TurmaService
 from application.curso_service import CursoService
 
@@ -48,15 +49,18 @@ class TurmaFrame(customtkinter.CTkFrame):
                 curso_id = c.id
         if not nome or not codigo or not curso_id:
             return
-        if self.editando_id is None:
-            self.service.cadastrar(nome, codigo, curso_id)
-        else:
-            self.service.atualizar(self.editando_id, nome, codigo, curso_id)
-            self.editando_id = None
-            self.add_btn.configure(text="Adicionar")
-        self.nome_entry.delete(0, "end")
-        self.codigo_entry.delete(0, "end")
-        self.atualizar_lista()
+        try:
+            if self.editando_id is None:
+                self.service.cadastrar(nome, codigo, curso_id)
+            else:
+                self.service.atualizar(self.editando_id, nome, codigo, curso_id)
+                self.editando_id = None
+                self.add_btn.configure(text="Adicionar")
+            self.nome_entry.delete(0, "end")
+            self.codigo_entry.delete(0, "end")
+            self.atualizar_lista()
+        except ValueError as e:
+            tkinter.messagebox.showerror("Erro", str(e))
 
     def editar_turma(self, turma_id):
         turma = next((t for t in self.turmas if getattr(t, "id", None) == turma_id), None)
@@ -75,12 +79,15 @@ class TurmaFrame(customtkinter.CTkFrame):
             self.add_btn.configure(text="Salvar")
 
     def excluir_turma(self, turma_id):
-        self.service.remover(turma_id)
-        self.editando_id = None
-        self.add_btn.configure(text="Adicionar")
-        self.nome_entry.delete(0, "end")
-        self.codigo_entry.delete(0, "end")
-        self.atualizar_lista()
+        try:
+            self.service.remover(turma_id)
+            self.editando_id = None
+            self.add_btn.configure(text="Adicionar")
+            self.nome_entry.delete(0, "end")
+            self.codigo_entry.delete(0, "end")
+            self.atualizar_lista()
+        except ValueError as e:
+            tkinter.messagebox.showerror("Erro", str(e))
 
     def atualizar_lista(self):
         for widget in self.lista_frame.winfo_children():
