@@ -84,14 +84,19 @@ class AlunoFrame(customtkinter.CTkFrame):
         for widget in self.lista_frame.winfo_children():
             widget.destroy()
         self.alunos = self.service.listar()
+        self.turmas = self.turma_service.listar()  # Atualiza a lista de turmas
         if not self.alunos:
             customtkinter.CTkLabel(self.lista_frame, text="Nenhum aluno cadastrado.").pack()
         else:
             for aluno in self.alunos:
+                turma_nome = ""
+                if aluno.turma_id:
+                    turma = next((t for t in self.turmas if t.id == aluno.turma_id), None)
+                    if turma:
+                        turma_nome = f" - Turma: {turma.nome} (ID: {turma.id})"
+                text = f"{aluno.nome} (Matrícula: {aluno.matricula}){turma_nome}"
                 row_frame = customtkinter.CTkFrame(self.lista_frame)
                 row_frame.pack(fill="x", padx=5, pady=2)
-                turma_info = f" - Turma: {aluno.turma.nome} (ID: {aluno.turma.id})" if aluno.turma else ""
-                text = f"{aluno.nome} (Matrícula: {aluno.matricula}){turma_info}"
                 customtkinter.CTkLabel(row_frame, text=text).pack(side="left", padx=10)
                 edit_btn = customtkinter.CTkButton(row_frame, text="Editar", width=80,
                                                    command=lambda i=aluno.id: self.editar_aluno(i))
