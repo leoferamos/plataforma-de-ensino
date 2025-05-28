@@ -25,6 +25,18 @@ class AlunoFrame(customtkinter.CTkFrame):
         self.matricula_entry = customtkinter.CTkEntry(form_frame)
         self.matricula_entry.grid(row=0, column=3, padx=5, pady=5)
 
+        customtkinter.CTkLabel(form_frame, text="Email:").grid(row=1, column=0, padx=5, pady=5)
+        self.email_entry = customtkinter.CTkEntry(form_frame)
+        self.email_entry.grid(row=1, column=1, padx=5, pady=5)
+
+        customtkinter.CTkLabel(form_frame, text="CPF:").grid(row=1, column=2, padx=5, pady=5)
+        self.cpf_entry = customtkinter.CTkEntry(form_frame)
+        self.cpf_entry.grid(row=1, column=3, padx=5, pady=5)
+
+        customtkinter.CTkLabel(form_frame, text="Data Nasc.:").grid(row=1, column=4, padx=5, pady=5)
+        self.data_nasc_entry = customtkinter.CTkEntry(form_frame)
+        self.data_nasc_entry.grid(row=1, column=5, padx=5, pady=5)
+
         customtkinter.CTkLabel(form_frame, text="Turma:").grid(row=0, column=4, padx=5, pady=5)
         self.turma_var = customtkinter.StringVar()
         turma_nomes = [f"{t.nome} (ID: {t.id})" for t in self.turmas]
@@ -32,7 +44,7 @@ class AlunoFrame(customtkinter.CTkFrame):
         self.turma_dropdown.grid(row=0, column=5, padx=5, pady=5)
 
         self.add_btn = customtkinter.CTkButton(form_frame, text="Adicionar", command=self.adicionar_ou_salvar_aluno)
-        self.add_btn.grid(row=0, column=6, padx=10, pady=5)
+        self.add_btn.grid(row=0, column=6, padx=10, pady=5, rowspan=2)
 
         self.lista_frame = customtkinter.CTkFrame(self)
         self.lista_frame.pack(padx=20, pady=10, fill="both", expand=True)
@@ -41,6 +53,9 @@ class AlunoFrame(customtkinter.CTkFrame):
     def adicionar_ou_salvar_aluno(self):
         nome = self.nome_entry.get()
         matricula = self.matricula_entry.get()
+        email = self.email_entry.get()
+        cpf = self.cpf_entry.get()
+        data_nascimento = self.data_nasc_entry.get()
         turma_nome = self.turma_var.get()
         turma_id = None
         for t in self.turmas:
@@ -49,13 +64,16 @@ class AlunoFrame(customtkinter.CTkFrame):
         if not nome or not matricula or not turma_id:
             return
         if self.editando_id is None:
-            self.service.cadastrar(nome, matricula, turma_id=turma_id)
+            self.service.cadastrar(nome, matricula, email, cpf, data_nascimento, turma_id)
         else:
-            self.service.atualizar(self.editando_id, nome, matricula, turma_id=turma_id)
+            self.service.atualizar(self.editando_id, nome, matricula, email, cpf, data_nascimento)
             self.editando_id = None
             self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.matricula_entry.delete(0, "end")
+        self.email_entry.delete(0, "end")
+        self.cpf_entry.delete(0, "end")
+        self.data_nasc_entry.delete(0, "end")
         self.turma_var.set("")
         self.atualizar_lista()
 
@@ -66,7 +84,17 @@ class AlunoFrame(customtkinter.CTkFrame):
             self.nome_entry.insert(0, aluno.nome)
             self.matricula_entry.delete(0, "end")
             self.matricula_entry.insert(0, aluno.matricula)
-            turma_nome = f"{aluno.turma.nome} (ID: {aluno.turma.id})" if aluno.turma else ""
+            self.email_entry.delete(0, "end")
+            self.email_entry.insert(0, aluno.email or "")
+            self.cpf_entry.delete(0, "end")
+            self.cpf_entry.insert(0, aluno.cpf or "")
+            self.data_nasc_entry.delete(0, "end")
+            self.data_nasc_entry.insert(0, aluno.data_nascimento or "")
+            turma_nome = ""
+            if aluno.turma_id:
+                turma = next((t for t in self.turmas if t.id == aluno.turma_id), None)
+                if turma:
+                    turma_nome = f"{turma.nome} (ID: {turma.id})"
             self.turma_var.set(turma_nome)
             self.editando_id = aluno_id
             self.add_btn.configure(text="Salvar")
@@ -84,7 +112,7 @@ class AlunoFrame(customtkinter.CTkFrame):
         for widget in self.lista_frame.winfo_children():
             widget.destroy()
         self.alunos = self.service.listar()
-        self.turmas = self.turma_service.listar()  # Atualiza a lista de turmas
+        self.turmas = self.turma_service.listar()
         if not self.alunos:
             customtkinter.CTkLabel(self.lista_frame, text="Nenhum aluno cadastrado.").pack()
         else:
@@ -94,7 +122,13 @@ class AlunoFrame(customtkinter.CTkFrame):
                     turma = next((t for t in self.turmas if t.id == aluno.turma_id), None)
                     if turma:
                         turma_nome = f" - Turma: {turma.nome} (ID: {turma.id})"
-                text = f"{aluno.nome} (Matrícula: {aluno.matricula}){turma_nome}"
+                text = (
+                    f"{aluno.nome} (Matrícula: {aluno.matricula})"
+                    f" | Email: {aluno.email or '-'}"
+                    f" | CPF: {aluno.cpf or '-'}"
+                    f" | Nasc.: {aluno.data_nascimento or '-'}"
+                    f"{turma_nome}"
+                )
                 row_frame = customtkinter.CTkFrame(self.lista_frame)
                 row_frame.pack(fill="x", padx=5, pady=2)
                 customtkinter.CTkLabel(row_frame, text=text).pack(side="left", padx=10)
