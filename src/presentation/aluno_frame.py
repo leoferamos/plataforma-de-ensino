@@ -1,10 +1,12 @@
 import customtkinter
+from application.aluno_service import AlunoService
 
 class AlunoFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
-        self.alunos = []
-        self.editando_idx = None
+        self.service = AlunoService()
+        self.alunos = self.service.listar()
+        self.editando_id = None
 
         label = customtkinter.CTkLabel(self, text="Gestão de Alunos", font=customtkinter.CTkFont(size=18, weight="bold"))
         label.pack(padx=20, pady=(20, 10))
@@ -32,28 +34,29 @@ class AlunoFrame(customtkinter.CTkFrame):
         matricula = self.matricula_entry.get()
         if not nome or not matricula:
             return
-        if self.editando_idx is None:
-            self.alunos.append({"nome": nome, "matricula": matricula})
+        if self.editando_id is None:
+            self.service.cadastrar(nome, matricula)
         else:
-            self.alunos[self.editando_idx] = {"nome": nome, "matricula": matricula}
-            self.editando_idx = None
+            self.service.atualizar(self.editando_id, nome, matricula)
+            self.editando_id = None
             self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.matricula_entry.delete(0, "end")
         self.atualizar_lista()
 
-    def editar_aluno(self, idx):
-        aluno = self.alunos[idx]
-        self.nome_entry.delete(0, "end")
-        self.nome_entry.insert(0, aluno["nome"])
-        self.matricula_entry.delete(0, "end")
-        self.matricula_entry.insert(0, aluno["matricula"])
-        self.editando_idx = idx
-        self.add_btn.configure(text="Salvar")
+    def editar_aluno(self, aluno_id):
+        aluno = next((a for a in self.alunos if getattr(a, "id", None) == aluno_id), None)
+        if aluno:
+            self.nome_entry.delete(0, "end")
+            self.nome_entry.insert(0, aluno.nome)
+            self.matricula_entry.delete(0, "end")
+            self.matricula_entry.insert(0, aluno.matricula)
+            self.editando_id = aluno_id
+            self.add_btn.configure(text="Salvar")
 
-    def excluir_aluno(self, idx):
-        del self.alunos[idx]
-        self.editando_idx = None
+    def excluir_aluno(self, aluno_id):
+        self.service.remover(aluno_id)
+        self.editando_id = None
         self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.matricula_entry.delete(0, "end")
@@ -62,17 +65,18 @@ class AlunoFrame(customtkinter.CTkFrame):
     def atualizar_lista(self):
         for widget in self.lista_frame.winfo_children():
             widget.destroy()
+        self.alunos = self.service.listar()
         if not self.alunos:
             customtkinter.CTkLabel(self.lista_frame, text="Nenhum aluno cadastrado.").pack()
         else:
-            for idx, aluno in enumerate(self.alunos):
+            for aluno in self.alunos:
                 row_frame = customtkinter.CTkFrame(self.lista_frame)
                 row_frame.pack(fill="x", padx=5, pady=2)
-                text = f"{aluno['nome']} (Matrícula: {aluno['matricula']})"
+                text = f"{aluno.nome} (Matrícula: {aluno.matricula})"
                 customtkinter.CTkLabel(row_frame, text=text).pack(side="left", padx=10)
                 edit_btn = customtkinter.CTkButton(row_frame, text="Editar", width=80,
-                                                   command=lambda i=idx: self.editar_aluno(i))
+                                                   command=lambda i=aluno.id: self.editar_aluno(i))
                 edit_btn.pack(side="right", padx=5)
                 del_btn = customtkinter.CTkButton(row_frame, text="Excluir", width=80, fg_color="red",
-                                                  command=lambda i=idx: self.excluir_aluno(i))
+                                                  command=lambda i=aluno.id: self.excluir_aluno(i))
                 del_btn.pack(side="right", padx=5)

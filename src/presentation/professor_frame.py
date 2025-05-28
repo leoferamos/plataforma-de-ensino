@@ -1,10 +1,12 @@
 import customtkinter
+from application.professor_service import ProfessorService
 
 class ProfessorFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
-        self.professores = []
-        self.editando_idx = None
+        self.service = ProfessorService()
+        self.professores = self.service.listar()
+        self.editando_id = None
 
         label = customtkinter.CTkLabel(self, text="Gestão de Professores", font=customtkinter.CTkFont(size=18, weight="bold"))
         label.pack(padx=20, pady=(20, 10))
@@ -32,28 +34,29 @@ class ProfessorFrame(customtkinter.CTkFrame):
         siape = self.siape_entry.get()
         if not nome or not siape:
             return
-        if self.editando_idx is None:
-            self.professores.append({"nome": nome, "siape": siape})
+        if self.editando_id is None:
+            self.service.cadastrar(nome, siape)
         else:
-            self.professores[self.editando_idx] = {"nome": nome, "siape": siape}
-            self.editando_idx = None
+            self.service.atualizar(self.editando_id, nome, siape)
+            self.editando_id = None
             self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.siape_entry.delete(0, "end")
         self.atualizar_lista()
 
-    def editar_professor(self, idx):
-        professor = self.professores[idx]
-        self.nome_entry.delete(0, "end")
-        self.nome_entry.insert(0, professor["nome"])
-        self.siape_entry.delete(0, "end")
-        self.siape_entry.insert(0, professor["siape"])
-        self.editando_idx = idx
-        self.add_btn.configure(text="Salvar")
+    def editar_professor(self, professor_id):
+        professor = next((p for p in self.professores if getattr(p, "id", None) == professor_id), None)
+        if professor:
+            self.nome_entry.delete(0, "end")
+            self.nome_entry.insert(0, professor.nome)
+            self.siape_entry.delete(0, "end")
+            self.siape_entry.insert(0, professor.siape)
+            self.editando_id = professor_id
+            self.add_btn.configure(text="Salvar")
 
-    def excluir_professor(self, idx):
-        del self.professores[idx]
-        self.editando_idx = None
+    def excluir_professor(self, professor_id):
+        self.service.remover(professor_id)
+        self.editando_id = None
         self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.siape_entry.delete(0, "end")
@@ -62,17 +65,18 @@ class ProfessorFrame(customtkinter.CTkFrame):
     def atualizar_lista(self):
         for widget in self.lista_frame.winfo_children():
             widget.destroy()
+        self.professores = self.service.listar()
         if not self.professores:
             customtkinter.CTkLabel(self.lista_frame, text="Nenhum professor cadastrado.").pack()
         else:
-            for idx, professor in enumerate(self.professores):
+            for professor in self.professores:
                 row_frame = customtkinter.CTkFrame(self.lista_frame)
                 row_frame.pack(fill="x", padx=5, pady=2)
-                text = f"{professor['nome']} (SIAPE: {professor['siape']})"
+                text = f"{professor.nome} (SIAPE: {professor.siape})"
                 customtkinter.CTkLabel(row_frame, text=text).pack(side="left", padx=10)
                 edit_btn = customtkinter.CTkButton(row_frame, text="Editar", width=80,
-                                                   command=lambda i=idx: self.editar_professor(i))
+                                                   command=lambda i=professor.id: self.editar_professor(i))
                 edit_btn.pack(side="right", padx=5)
                 del_btn = customtkinter.CTkButton(row_frame, text="Excluir", width=80, fg_color="red",
-                                                  command=lambda i=idx: self.excluir_professor(i))
+                                                  command=lambda i=professor.id: self.excluir_professor(i))
                 del_btn.pack(side="right", padx=5)

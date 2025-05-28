@@ -1,10 +1,12 @@
 import customtkinter
+from application.curso_service import CursoService
 
 class CursoFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
-        self.cursos = []
-        self.editando_idx = None
+        self.service = CursoService()
+        self.cursos = self.service.listar()
+        self.editando_id = None
 
         label = customtkinter.CTkLabel(self, text="Gestão de Cursos", font=customtkinter.CTkFont(size=18, weight="bold"))
         label.pack(padx=20, pady=(20, 10))
@@ -32,28 +34,29 @@ class CursoFrame(customtkinter.CTkFrame):
         codigo = self.codigo_entry.get()
         if not nome or not codigo:
             return
-        if self.editando_idx is None:
-            self.cursos.append({"nome": nome, "codigo": codigo})
+        if self.editando_id is None:
+            self.service.cadastrar(nome, codigo)
         else:
-            self.cursos[self.editando_idx] = {"nome": nome, "codigo": codigo}
-            self.editando_idx = None
+            self.service.atualizar(self.editando_id, nome, codigo)
+            self.editando_id = None
             self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.codigo_entry.delete(0, "end")
         self.atualizar_lista()
 
-    def editar_curso(self, idx):
-        curso = self.cursos[idx]
-        self.nome_entry.delete(0, "end")
-        self.nome_entry.insert(0, curso["nome"])
-        self.codigo_entry.delete(0, "end")
-        self.codigo_entry.insert(0, curso["codigo"])
-        self.editando_idx = idx
-        self.add_btn.configure(text="Salvar")
+    def editar_curso(self, curso_id):
+        curso = next((c for c in self.cursos if getattr(c, "id", None) == curso_id), None)
+        if curso:
+            self.nome_entry.delete(0, "end")
+            self.nome_entry.insert(0, curso.nome)
+            self.codigo_entry.delete(0, "end")
+            self.codigo_entry.insert(0, curso.codigo)
+            self.editando_id = curso_id
+            self.add_btn.configure(text="Salvar")
 
-    def excluir_curso(self, idx):
-        del self.cursos[idx]
-        self.editando_idx = None
+    def excluir_curso(self, curso_id):
+        self.service.remover(curso_id)
+        self.editando_id = None
         self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.codigo_entry.delete(0, "end")
@@ -62,17 +65,18 @@ class CursoFrame(customtkinter.CTkFrame):
     def atualizar_lista(self):
         for widget in self.lista_frame.winfo_children():
             widget.destroy()
+        self.cursos = self.service.listar()
         if not self.cursos:
             customtkinter.CTkLabel(self.lista_frame, text="Nenhum curso cadastrado.").pack()
         else:
-            for idx, curso in enumerate(self.cursos):
+            for curso in self.cursos:
                 row_frame = customtkinter.CTkFrame(self.lista_frame)
                 row_frame.pack(fill="x", padx=5, pady=2)
-                text = f"{curso['nome']} (Código: {curso['codigo']})"
+                text = f"{curso.nome} (Código: {curso.codigo})"
                 customtkinter.CTkLabel(row_frame, text=text).pack(side="left", padx=10)
                 edit_btn = customtkinter.CTkButton(row_frame, text="Editar", width=80,
-                                                   command=lambda i=idx: self.editar_curso(i))
+                                                   command=lambda i=curso.id: self.editar_curso(i))
                 edit_btn.pack(side="right", padx=5)
                 del_btn = customtkinter.CTkButton(row_frame, text="Excluir", width=80, fg_color="red",
-                                                  command=lambda i=idx: self.excluir_curso(i))
+                                                  command=lambda i=curso.id: self.excluir_curso(i))
                 del_btn.pack(side="right", padx=5)
