@@ -1,11 +1,14 @@
 import customtkinter
 from application.turma_service import TurmaService
+from application.curso_service import CursoService
 
 class TurmaFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
         self.service = TurmaService()
+        self.curso_service = CursoService()
         self.turmas = self.service.listar()
+        self.cursos = self.curso_service.listar()
         self.editando_id = None
 
         label = customtkinter.CTkLabel(self, text="Gestão de Turmas", font=customtkinter.CTkFont(size=18, weight="bold"))
@@ -22,9 +25,11 @@ class TurmaFrame(customtkinter.CTkFrame):
         self.codigo_entry = customtkinter.CTkEntry(form_frame)
         self.codigo_entry.grid(row=0, column=3, padx=5, pady=5)
 
-        customtkinter.CTkLabel(form_frame, text="ID do Curso:").grid(row=0, column=4, padx=5, pady=5)
-        self.curso_id_entry = customtkinter.CTkEntry(form_frame)
-        self.curso_id_entry.grid(row=0, column=5, padx=5, pady=5)
+        customtkinter.CTkLabel(form_frame, text="Curso:").grid(row=0, column=4, padx=5, pady=5)
+        self.curso_var = customtkinter.StringVar()
+        curso_nomes = [f"{c.nome} (ID: {c.id})" for c in self.cursos]
+        self.curso_dropdown = customtkinter.CTkOptionMenu(form_frame, variable=self.curso_var, values=curso_nomes)
+        self.curso_dropdown.grid(row=0, column=5, padx=5, pady=5)
 
         self.add_btn = customtkinter.CTkButton(form_frame, text="Adicionar", command=self.adicionar_ou_salvar_turma)
         self.add_btn.grid(row=0, column=6, padx=10, pady=5)
@@ -36,9 +41,12 @@ class TurmaFrame(customtkinter.CTkFrame):
     def adicionar_ou_salvar_turma(self):
         nome = self.nome_entry.get()
         codigo = self.codigo_entry.get()
-        curso_id = self.curso_id_entry.get()
-        curso_id = int(curso_id) if curso_id.isdigit() else None
-        if not nome or not codigo:
+        curso_nome = self.curso_var.get()
+        curso_id = None
+        for c in self.cursos:
+            if f"{c.nome} (ID: {c.id})" == curso_nome:
+                curso_id = c.id
+        if not nome or not codigo or not curso_id:
             return
         if self.editando_id is None:
             self.service.cadastrar(nome, codigo, curso_id)
@@ -48,7 +56,6 @@ class TurmaFrame(customtkinter.CTkFrame):
             self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.codigo_entry.delete(0, "end")
-        self.curso_id_entry.delete(0, "end")
         self.atualizar_lista()
 
     def editar_turma(self, turma_id):
@@ -58,8 +65,7 @@ class TurmaFrame(customtkinter.CTkFrame):
             self.nome_entry.insert(0, turma.nome)
             self.codigo_entry.delete(0, "end")
             self.codigo_entry.insert(0, turma.codigo)
-            self.curso_id_entry.delete(0, "end")
-            self.curso_id_entry.insert(0, turma.curso_id if turma.curso_id is not None else "")
+            self.curso_var.set(f"{turma.curso.nome} (ID: {turma.curso_id})" if turma.curso_id is not None else "")
             self.editando_id = turma_id
             self.add_btn.configure(text="Salvar")
 
@@ -69,7 +75,6 @@ class TurmaFrame(customtkinter.CTkFrame):
         self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.codigo_entry.delete(0, "end")
-        self.curso_id_entry.delete(0, "end")
         self.atualizar_lista()
 
     def atualizar_lista(self):
