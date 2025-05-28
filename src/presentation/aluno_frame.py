@@ -80,13 +80,17 @@ class AlunoFrame(customtkinter.CTkFrame):
         email = self.email_entry.get()
         cpf = self.cpf_entry.get()
         data_nascimento = self.data_nasc_entry.get()
-        # Validação da data
-        try:
-            if data_nascimento:
-                datetime.datetime.strptime(data_nascimento, "%Y-%m-%d")
-        except ValueError:
-            tkinter.messagebox.showerror("Erro", "Data de nascimento inválida! Use o formato YYYY-MM-DD.")
-            return
+        # Validação e conversão do formato
+        if data_nascimento:
+            try:
+                # Converte de DD/MM/AAAA para YYYY-MM-DD
+                dt = datetime.datetime.strptime(data_nascimento, "%d/%m/%Y")
+                data_nascimento_db = dt.strftime("%Y-%m-%d")
+            except ValueError:
+                tkinter.messagebox.showerror("Erro", "Data de nascimento inválida! Use o formato DD/MM/AAAA.")
+                return
+        else:
+            data_nascimento_db = None
         turma_nome = self.turma_var.get()
         turma_id = None
         for t in self.turmas:
@@ -95,9 +99,9 @@ class AlunoFrame(customtkinter.CTkFrame):
         if not nome or not matricula or not turma_id:
             return
         if self.editando_id is None:
-            self.service.cadastrar(nome, matricula, email, cpf, data_nascimento, turma_id)
+            self.service.cadastrar(nome, matricula, email, cpf, data_nascimento_db, turma_id)
         else:
-            self.service.atualizar(self.editando_id, nome, matricula, email, cpf, data_nascimento)
+            self.service.atualizar(self.editando_id, nome, matricula, email, cpf, data_nascimento_db)
             self.editando_id = None
             self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
@@ -120,7 +124,19 @@ class AlunoFrame(customtkinter.CTkFrame):
             self.cpf_entry.delete(0, "end")
             self.cpf_entry.insert(0, aluno.cpf or "")
             self.data_nasc_entry.delete(0, "end")
-            self.data_nasc_entry.insert(0, aluno.data_nascimento or "")
+            # Conversão de YYYY-MM-DD ou datetime.date para DD/MM/AAAA
+            if aluno.data_nascimento:
+                try:
+                    if isinstance(aluno.data_nascimento, datetime.date):
+                        dt = aluno.data_nascimento
+                    else:
+                        dt = datetime.datetime.strptime(aluno.data_nascimento, "%Y-%m-%d")
+                    data_nasc_str = dt.strftime("%d/%m/%Y")
+                except Exception:
+                    data_nasc_str = str(aluno.data_nascimento)
+                self.data_nasc_entry.insert(0, data_nasc_str)
+            else:
+                self.data_nasc_entry.insert(0, "")
             turma_nome = ""
             if aluno.turma_id:
                 turma = next((t for t in self.turmas if t.id == aluno.turma_id), None)
