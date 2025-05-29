@@ -210,20 +210,28 @@ class AlunoFrame(customtkinter.CTkFrame):
         )
         if not file_path:
             return
+        ignorados = []
+        importados = 0
         try:
             with open(file_path, "r", encoding="utf-8") as f:
-                for line in f:
+                for idx, line in enumerate(f, 1):
                     # Espera: nome,matricula,email,cpf,data_nascimento,turma_id
                     campos = line.strip().split(",")
                     if len(campos) < 6:
+                        ignorados.append(f"Linha {idx}: formato inválido")
                         continue
                     nome, matricula, email, cpf, data_nascimento, turma_id = campos
                     try:
                         self.service.cadastrar(nome, matricula, email, cpf, data_nascimento, int(turma_id))
+                        importados += 1
+                    except ValueError as e:
+                        ignorados.append(f"Linha {idx}: {e}")
                     except Exception as e:
-                        # Você pode mostrar um erro ou apenas pular
-                        continue
-            tkinter.messagebox.showinfo("Importação", "Importação concluída!")
+                        ignorados.append(f"Linha {idx}: erro inesperado")
+            msg = f"Importação concluída!\nAlunos importados: {importados}"
+            if ignorados:
+                msg += f"\n\nIgnorados:\n" + "\n".join(ignorados)
+            tkinter.messagebox.showinfo("Importação", msg)
             self.atualizar_lista()
         except Exception as e:
             tkinter.messagebox.showerror("Erro", f"Erro ao importar: {e}")
