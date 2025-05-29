@@ -1,5 +1,6 @@
 import customtkinter
 from presentation.forms import AlunoFrame, ProfessorFrame, CursoFrame, TurmaFrame
+from presentation.relatorio_frame import RelatorioFrame 
 
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
@@ -19,7 +20,7 @@ class App(customtkinter.CTk):
         # Sidebar
         self.sidebar_frame = customtkinter.CTkFrame(self, width=180, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, sticky="ns")
-        self.sidebar_frame.grid_rowconfigure(6, weight=1)
+        self.sidebar_frame.grid_rowconfigure(7, weight=1)
 
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Plataforma Ensino", font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
@@ -32,12 +33,17 @@ class App(customtkinter.CTk):
         self.btn_cursos.grid(row=3, column=0, padx=20, pady=10)
         self.btn_turmas = customtkinter.CTkButton(self.sidebar_frame, text="Turmas", command=self.show_turmas)
         self.btn_turmas.grid(row=4, column=0, padx=20, pady=10)
+        self.btn_relatorio = customtkinter.CTkButton(self.sidebar_frame, text="Relatório", command=self.show_relatorio)  # Adicione este botão
+        self.btn_relatorio.grid(row=5, column=0, padx=20, pady=10)  
 
-        self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text="Tema:", anchor="w")
-        self.appearance_mode_label.grid(row=7, column=0, padx=20, pady=(10, 0))
-        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_frame, values=["Light", "Dark", "System"],
-                                                                       command=self.change_appearance_mode_event)
-        self.appearance_mode_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 10))
+        tema_frame = customtkinter.CTkFrame(self.sidebar_frame, fg_color="transparent")
+        tema_frame.grid(row=7, column=0, padx=20, pady=(10, 10), sticky="ew")
+        self.appearance_mode_label = customtkinter.CTkLabel(tema_frame, text="Tema:", anchor="w")
+        self.appearance_mode_label.pack(side="left")
+        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(
+            tema_frame, values=["Light", "Dark", "System"], command=self.change_appearance_mode_event
+        )
+        self.appearance_mode_optionemenu.pack(side="left", padx=(5, 0))
 
         # Main content area
         self.main_content = customtkinter.CTkFrame(self)
@@ -69,6 +75,11 @@ class App(customtkinter.CTk):
     def show_turmas(self):
         self.clear_main_content()
         self.current_frame = TurmaFrame(self.main_content)
+        self.current_frame.pack(fill="both", expand=True)
+
+    def show_relatorio(self): 
+        self.clear_main_content()
+        self.current_frame = RelatorioFrame(self.main_content) 
         self.current_frame.pack(fill="both", expand=True)
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
