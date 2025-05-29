@@ -221,8 +221,23 @@ class AlunoFrame(customtkinter.CTkFrame):
                         ignorados.append(f"Linha {idx}: formato inválido")
                         continue
                     nome, matricula, email, cpf, data_nascimento, turma_id = campos
+                    # Conversão da data de nascimento
+                    data_nascimento_db = None
+                    if data_nascimento:
+                        try:
+                            # Tenta converter de DD/MM/AAAA para YYYY-MM-DD
+                            dt = datetime.datetime.strptime(data_nascimento, "%d/%m/%Y")
+                            data_nascimento_db = dt.strftime("%Y-%m-%d")
+                        except ValueError:
+                            # Se já estiver no formato correto, tenta usar direto
+                            try:
+                                dt = datetime.datetime.strptime(data_nascimento, "%Y-%m-%d")
+                                data_nascimento_db = data_nascimento
+                            except ValueError:
+                                ignorados.append(f"Linha {idx}: Data de nascimento inválida! Use o formato DD/MM/AAAA ou YYYY-MM-DD.")
+                                continue
                     try:
-                        self.service.cadastrar(nome, matricula, email, cpf, data_nascimento, int(turma_id))
+                        self.service.cadastrar(nome, matricula, email, cpf, data_nascimento_db, int(turma_id))
                         importados += 1
                     except ValueError as e:
                         ignorados.append(f"Linha {idx}: {e}")

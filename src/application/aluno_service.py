@@ -59,6 +59,12 @@ class AlunoService:
                 raise ValueError("CPF deve conter apenas números.")
         if cpf and self.cpf_existe(cpf, ignorar_id=aluno_id):
             raise ValueError("CPF já cadastrado para outro aluno ou professor.")
+        # Validação da data
+        if data_nascimento:
+            try:
+                datetime.datetime.strptime(data_nascimento, "%Y-%m-%d")
+            except ValueError:
+                raise ValueError("Data de nascimento inválida! Use o formato YYYY-MM-DD.")
         aluno = Aluno(nome=nome, matricula=matricula)
         aluno.id = aluno_id
         aluno.email = email
