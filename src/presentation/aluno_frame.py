@@ -5,6 +5,7 @@ import datetime
 import tkinter.messagebox
 import tkinter as tk
 import re
+import tkinter.filedialog
 
 class AlunoFrame(customtkinter.CTkFrame):
     def __init__(self, master):
@@ -50,6 +51,9 @@ class AlunoFrame(customtkinter.CTkFrame):
 
         self.add_btn = customtkinter.CTkButton(form_frame, text="Adicionar", command=self.adicionar_ou_salvar_aluno)
         self.add_btn.grid(row=0, column=6, padx=10, pady=5, rowspan=2)
+
+        self.import_btn = customtkinter.CTkButton(form_frame, text="Importar Alunos", command=self.importar_alunos)
+        self.import_btn.grid(row=0, column=7, padx=10, pady=5, rowspan=2)
 
         self.lista_frame = customtkinter.CTkFrame(self)
         self.lista_frame.pack(padx=20, pady=10, fill="both", expand=True)
@@ -198,3 +202,28 @@ class AlunoFrame(customtkinter.CTkFrame):
                 del_btn = customtkinter.CTkButton(row_frame, text="Excluir", width=80, fg_color="red",
                                                   command=lambda i=aluno.id: self.excluir_aluno(i))
                 del_btn.pack(side="right", padx=5)
+
+    def importar_alunos(self):
+        file_path = tkinter.filedialog.askopenfilename(
+            title="Selecione o arquivo de alunos",
+            filetypes=[("CSV Files", "*.csv"), ("Text Files", "*.txt"), ("All Files", "*.*")]
+        )
+        if not file_path:
+            return
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    # Espera: nome,matricula,email,cpf,data_nascimento,turma_id
+                    campos = line.strip().split(",")
+                    if len(campos) < 6:
+                        continue
+                    nome, matricula, email, cpf, data_nascimento, turma_id = campos
+                    try:
+                        self.service.cadastrar(nome, matricula, email, cpf, data_nascimento, int(turma_id))
+                    except Exception as e:
+                        # Você pode mostrar um erro ou apenas pular
+                        continue
+            tkinter.messagebox.showinfo("Importação", "Importação concluída!")
+            self.atualizar_lista()
+        except Exception as e:
+            tkinter.messagebox.showerror("Erro", f"Erro ao importar: {e}")
