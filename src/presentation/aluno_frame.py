@@ -50,10 +50,10 @@ class AlunoFrame(customtkinter.CTkFrame):
         self.turma_dropdown.grid(row=0, column=5, padx=5, pady=5)
 
         self.add_btn = customtkinter.CTkButton(form_frame, text="Adicionar", command=self.adicionar_ou_salvar_aluno)
-        self.add_btn.grid(row=0, column=6, padx=10, pady=5, rowspan=2)
+        self.add_btn.grid(row=0, column=6, padx=10, pady=5, rowspan=1)
 
         self.import_btn = customtkinter.CTkButton(form_frame, text="Importar Alunos", command=self.importar_alunos)
-        self.import_btn.grid(row=0, column=7, padx=10, pady=5, rowspan=2)
+        self.import_btn.grid(row=1, column=6, padx=10, pady=5, rowspan=1)
 
         self.lista_frame = customtkinter.CTkFrame(self)
         self.lista_frame.pack(padx=20, pady=10, fill="both", expand=True)
