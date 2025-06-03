@@ -6,8 +6,8 @@ class CursoService:
     def __init__(self):
         self.repo = CursoRepository()
 
-    def cadastrar(self, nome, codigo):
-        curso = Curso(nome=nome, codigo=codigo)
+    def cadastrar(self, nome, codigo, categoria):
+        curso = Curso(nome=nome, codigo=codigo, categoria=categoria)
         self.repo.adicionar(curso)
         return curso
 
@@ -22,8 +22,7 @@ class CursoService:
                 raise ValueError("Não é possível excluir o curso: existem professores vinculados a ele.")
             raise
 
-    def atualizar(self, curso_id, nome, codigo):
-        curso = Curso(nome=nome, codigo=codigo)
-        curso.id = curso_id
+    def atualizar(self, curso_id, nome, codigo, categoria):
+        curso = Curso(nome=nome, codigo=codigo, categoria=categoria, id=curso_id)
         self.repo.atualizar(curso)
         return curso
