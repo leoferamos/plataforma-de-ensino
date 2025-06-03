@@ -5,8 +5,8 @@ class CursoRepository:
     def adicionar(self, curso: Curso):
         conn = get_connection()
         cursor = conn.cursor()
-        sql = "INSERT INTO curso (nome, codigo) VALUES (%s, %s)"
-        cursor.execute(sql, (curso.nome, curso.codigo))
+        sql = "INSERT INTO curso (nome, codigo, categoria) VALUES (%s, %s, %s)"
+        cursor.execute(sql, (curso.nome, curso.codigo, curso.categoria))
         conn.commit()
         cursor.close()
         conn.close()
@@ -14,12 +14,13 @@ class CursoRepository:
     def listar(self):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT id, nome, codigo FROM curso")
+        cursor.execute("SELECT id, nome, codigo, categoria FROM curso")
         cursos = []
         for row in cursor.fetchall():
             curso = Curso(
                 nome=row[1],
                 codigo=row[2],
+                categoria=row[3],
                 id=row[0]
             )
             cursos.append(curso)
@@ -38,8 +39,8 @@ class CursoRepository:
     def atualizar(self, curso: Curso):
         conn = get_connection()
         cursor = conn.cursor()
-        sql = "UPDATE curso SET nome=%s, codigo=%s WHERE id=%s"
-        cursor.execute(sql, (curso.nome, curso.codigo, curso.id))
+        sql = "UPDATE curso SET nome=%s, codigo=%s, categoria=%s WHERE id=%s"
+        cursor.execute(sql, (curso.nome, curso.codigo, curso.categoria, curso.id))
         conn.commit()
         cursor.close()
         conn.close()
