@@ -1,7 +1,11 @@
 import customtkinter
-from shared.utils import montar_arvore_curso_turmas, print_arvore, matriz_adjacencias
+from shared.utils import montar_arvore_curso_turmas, matriz_adjacencias, gerar_texto_arvore, gerar_texto_matriz
 from application.curso_service import CursoService
 from application.turma_service import TurmaService
+from application.curso_prerequisito_service import CursoPrerequisitoService
+import matplotlib.pyplot as plt
+import networkx as nx
+from PIL import Image
 
 class RelatorioFrame(customtkinter.CTkFrame):
     def __init__(self, master):
@@ -47,25 +51,38 @@ class RelatorioFrame(customtkinter.CTkFrame):
         )
         explicacao_label.pack(padx=20, pady=(0, 10), anchor="w")
 
+        self.atualizar_relatorio()
+
+        self.gerar_grafo_cursos("grafo_cursos.png")
+        img = customtkinter.CTkImage(Image.open("grafo_cursos.png"), size=(400, 240))
+        img_label = customtkinter.CTkLabel(self, image=img, text="")
+        img_label.pack(padx=20, pady=10)
+
+    def atualizar_relatorio(self):
+        self.arvore_text.configure(state="normal")
+        self.arvore_text.delete("1.0", "end")
+        self.arvore_text.insert("end", self.gerar_texto_arvore())
+        self.arvore_text.configure(state="disabled")
+
+        self.matriz_text.configure(state="normal")
+        self.matriz_text.delete("1.0", "end")
+        self.matriz_text.insert("end", self.gerar_texto_matriz())
+        self.matriz_text.configure(state="disabled")
+
     def gerar_texto_arvore(self):
         cursos = self.curso_service.listar()
         turmas = self.turma_service.listar()
         arvore = montar_arvore_curso_turmas(cursos, turmas)
-        def print_arvore_text(nodes, nivel=0):
-            texto = ""
-            for node in nodes:
-                texto += "  " * nivel + f"- {node.value}\n"
-                texto += print_arvore_text(node.children, nivel + 1)
-            return texto
-        return print_arvore_text(arvore)
+        return gerar_texto_arvore(arvore)
 
     def gerar_texto_matriz(self):
         cursos = self.curso_service.listar()
-        # Exemplo de pré-requisitos (ajuste conforme seu banco)
-        prerequisitos = [(1, 2), (2, 3)]  # IDs de cursos
+        prerequisitos = CursoPrerequisitoService().listar()
         matriz = matriz_adjacencias(cursos, prerequisitos)
-        nomes = [curso.nome for curso in cursos]
-        texto = "     " + "  ".join(f"{n[:4]}" for n in nomes) + "\n"
-        for i, row in enumerate(matriz):
-            texto += f"{nomes[i][:4]}: " + "  ".join(str(x) for x in row) + "\n"
-        return texto
+        return gerar_texto_matriz(matriz, cursos)
+
+    def gerar_grafo_cursos(self, img_path="grafo_cursos.png"):
+        cursos = self.curso_service.listar()
+        prerequisitos = CursoPrerequisitoService().listar()
+        from shared.utils import gerar_grafo_cursos
+        gerar_grafo_cursos(cursos, prerequisitos, img_path)
