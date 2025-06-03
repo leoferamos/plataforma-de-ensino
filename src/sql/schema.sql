@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS curso (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    codigo VARCHAR(20) NOT NULL UNIQUE
+    codigo VARCHAR(20) NOT NULL UNIQUE,
+    categoria VARCHAR(50),
+    grau VARCHAR(30)
 );
 
 CREATE TABLE IF NOT EXISTS professor (
@@ -37,4 +39,12 @@ CREATE TABLE IF NOT EXISTS aluno (
     data_nascimento DATE,
     turma_id INT,
     FOREIGN KEY (turma_id) REFERENCES turma(id)
+);
+
+CREATE TABLE IF NOT EXISTS curso_prerequisito (
+    curso_id INT,
+    prerequisito_id INT,
+    PRIMARY KEY (curso_id, prerequisito_id),
+    FOREIGN KEY (curso_id) REFERENCES curso(id),
+    FOREIGN KEY (prerequisito_id) REFERENCES curso(id)
 );
