@@ -17,10 +17,14 @@ def montar_arvore_curso_turmas(cursos, turmas):
         raiz.append(curso_node)
     return raiz
 
-def print_arvore(nodes, nivel=0):
-    for node in nodes:
-        print("  " * nivel + f"- {node.value}")
-        print_arvore(node.children, nivel + 1)
+def gerar_texto_arvore(arvore):
+    def print_arvore_text(nodes, nivel=0):
+        texto = ""
+        for node in nodes:
+            texto += "  " * nivel + f"- {node.value}\n"
+            texto += print_arvore_text(node.children, nivel + 1)
+        return texto
+    return print_arvore_text(arvore)
 
 def matriz_adjacencias(cursos, prerequisitos):
     """
@@ -38,9 +42,25 @@ def matriz_adjacencias(cursos, prerequisitos):
             matriz[i][j] = 1
     return matriz
 
-def print_matriz(matriz, cursos):
+def gerar_texto_matriz(matriz, cursos):
     nomes = [curso.nome for curso in cursos]
-    print("Matriz de Adjacências:")
-    print("     " + "  ".join(f"{n[:4]}" for n in nomes))
+    texto = "     " + "  ".join(f"{n[:4]}" for n in nomes) + "\n"
     for i, row in enumerate(matriz):
-        print(f"{nomes[i][:4]}: " + "  ".join(str(x) for x in row))
+        texto += f"{nomes[i][:4]}: " + "  ".join(str(x) for x in row) + "\n"
+    return texto
+
+def gerar_grafo_cursos(cursos, prerequisitos, img_path="grafo_cursos.png"):
+    import networkx as nx
+    import matplotlib.pyplot as plt
+    G = nx.DiGraph()
+    for curso in cursos:
+        G.add_node(curso.nome)
+    for origem, destino in prerequisitos:
+        nome_origem = next((c.nome for c in cursos if c.id == origem), None)
+        nome_destino = next((c.nome for c in cursos if c.id == destino), None)
+        if nome_origem and nome_destino:
+            G.add_edge(nome_origem, nome_destino)
+    plt.figure(figsize=(5,3))
+    nx.draw(G, with_labels=True, node_color='lightblue', arrows=True)
+    plt.savefig(img_path)
+    plt.close()
