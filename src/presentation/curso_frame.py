@@ -78,12 +78,9 @@ class CursoFrame(customtkinter.CTkFrame):
         self.prereq_vars = {}
         self.prereq_checks = []
 
-        # Pega categoria do combo ou do entry
-        categoria = self.categoria_var.get() or self.categoria_entry.get()
+        categoria = self.categoria_var.get()
         grau = self.grau_var.get()
-        # Atualiza lista de cursos
         self.cursos = self.service.listar()
-        # Filtra possíveis pré-requisitos
         if grau == "Mestrado":
             prereq_cursos = [c for c in self.cursos if c.grau == "Bacharelado" and c.categoria == categoria]
         elif grau == "Doutorado":
@@ -101,7 +98,7 @@ class CursoFrame(customtkinter.CTkFrame):
     def adicionar_ou_salvar_curso(self):
         nome = self.nome_entry.get()
         codigo = self.codigo_entry.get()
-        categoria = self.categoria_entry.get()
+        categoria = self.categoria_var.get()
         grau = self.grau_var.get()
         prerequisitos = [cid for cid, var in self.prereq_vars.items() if var.get()]
         if not nome or not codigo or not categoria or not grau:
@@ -120,8 +117,8 @@ class CursoFrame(customtkinter.CTkFrame):
             self.add_btn.configure(text="Adicionar")
         self.nome_entry.delete(0, "end")
         self.codigo_entry.delete(0, "end")
-        self.categoria_entry.delete(0, "end")
         self.grau_var.set(GRAUS[0])
+        self.categoria_var.set(CATEGORIAS[0])
         self.atualizar_prerequisitos()
         self.atualizar_lista()
 
@@ -132,8 +129,7 @@ class CursoFrame(customtkinter.CTkFrame):
             self.nome_entry.insert(0, curso.nome)
             self.codigo_entry.delete(0, "end")
             self.codigo_entry.insert(0, curso.codigo)
-            self.categoria_entry.delete(0, "end")
-            self.categoria_entry.insert(0, getattr(curso, "categoria", ""))
+            self.categoria_var.set(getattr(curso, "categoria", CATEGORIAS[0]))
             self.grau_var.set(getattr(curso, "grau", GRAUS[0]))
             self.editando_id = curso_id
             self.add_btn.configure(text="Salvar")
@@ -146,8 +142,8 @@ class CursoFrame(customtkinter.CTkFrame):
             self.add_btn.configure(text="Adicionar")
             self.nome_entry.delete(0, "end")
             self.codigo_entry.delete(0, "end")
-            self.categoria_entry.delete(0, "end")
             self.grau_var.set(GRAUS[0])
+            self.categoria_var.set(CATEGORIAS[0])
             self.atualizar_prerequisitos()
             self.atualizar_lista()
         except ValueError as e:
