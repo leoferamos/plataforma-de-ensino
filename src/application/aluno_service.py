@@ -72,5 +72,3 @@ class AlunoService:
         aluno.data_nascimento = data_nascimento
         self.repo.atualizar(aluno)
         return aluno
-
-        self.curso_var.set(f"{turma.curso.nome} (ID: {turma.curso_id})" if turma.curso_id is not None else "")
