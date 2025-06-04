@@ -8,7 +8,7 @@ class CursoService:
 
     def cadastrar(self, nome, codigo, categoria, grau):
         curso = Curso(nome=nome, codigo=codigo, categoria=categoria, grau=grau)
-        self.repo.adicionar(curso)
+        curso.id = self.repo.adicionar(curso) 
         return curso
 
     def listar(self):
@@ -19,7 +19,7 @@ class CursoService:
             self.repo.remover(curso_id)
         except mysql.connector.errors.IntegrityError as e:
             if "foreign key constraint fails" in str(e):
-                raise ValueError("Não é possível excluir o curso: existem professores vinculados a ele.")
+                raise ValueError("Não é possível excluir o curso: existem vínculos com turmas, professores ou pré-requisitos.")
             raise
 
     def atualizar(self, curso_id, nome, codigo, categoria, grau):
