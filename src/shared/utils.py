@@ -109,6 +109,5 @@ def gerar_imagem_matriz(cursos, prerequisitos, img_path="matriz_adjacencia.png")
             ax.text(j, i, str(matriz[i][j]), va='center', ha='center', color='red' if matriz[i][j] else 'black', fontsize=10)
 
     plt.title("Matriz de Adjacência de Pré-requisitos")
-    plt.tight_layout()
     plt.savefig(img_path)
     plt.close()
