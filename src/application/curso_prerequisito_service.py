@@ -12,3 +12,6 @@ class CursoPrerequisitoService:
 
     def remover_todos(self, curso_id):
         self.repo.remover_todos(curso_id)
+
+    def remover_todos_como_prerequisito(self, prereq_id):
+        self.repo.remover_todos_como_prerequisito(prereq_id)
