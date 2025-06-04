@@ -8,8 +8,10 @@ class CursoRepository:
         sql = "INSERT INTO curso (nome, codigo, categoria, grau) VALUES (%s, %s, %s, %s)"
         cursor.execute(sql, (curso.nome, curso.codigo, curso.categoria, curso.grau))
         conn.commit()
+        curso_id = cursor.lastrowid 
         cursor.close()
         conn.close()
+        return curso_id
 
     def listar(self):
         conn = get_connection()
