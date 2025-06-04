@@ -28,3 +28,11 @@ class CursoPrerequisitoRepository:
         conn.commit()
         cursor.close()
         conn.close()
+
+    def remover_todos_como_prerequisito(self, prereq_id):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM curso_prerequisito WHERE prerequisito_id = %s", (prereq_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
