@@ -214,7 +214,7 @@ class AlunoFrame(customtkinter.CTkFrame):
         importados = 0
         # Atualize a lista de turmas antes de importar
         self.turmas = self.turma_service.listar()
-        turma_ids_existentes = {t.id for t in self.turmas}
+        turma_codigos = {t.codigo: t.id for t in self.turmas}
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 for idx, line in enumerate(f, 1):
@@ -222,14 +222,11 @@ class AlunoFrame(customtkinter.CTkFrame):
                     if len(campos) < 6:
                         ignorados.append(f"Linha {idx}: formato inválido")
                         continue
-                    nome, matricula, email, cpf, data_nascimento, turma_id = campos
-                    try:
-                        turma_id_int = int(turma_id)
-                    except ValueError:
-                        ignorados.append(f"Linha {idx}: turma_id inválido")
-                        continue
-                    if turma_id_int not in turma_ids_existentes:
-                        ignorados.append(f"Linha {idx}: Turma com ID {turma_id_int} não existe.")
+                    nome, matricula, email, cpf, data_nascimento, turma_codigo = campos
+                    turma_codigo = turma_codigo.strip()
+                    turma_id = turma_codigos.get(turma_codigo)
+                    if not turma_id:
+                        ignorados.append(f"Linha {idx}: Turma com código '{turma_codigo}' não existe.")
                         continue
                     # Conversão da data de nascimento
                     data_nascimento_db = None
@@ -245,7 +242,7 @@ class AlunoFrame(customtkinter.CTkFrame):
                                 ignorados.append(f"Linha {idx}: Data de nascimento inválida! Use o formato DD/MM/AAAA ou YYYY-MM-DD.")
                                 continue
                     try:
-                        self.service.cadastrar(nome, matricula, email, cpf, data_nascimento_db, turma_id_int)
+                        self.service.cadastrar(nome, matricula, email, cpf, data_nascimento_db, turma_id)
                         importados += 1
                     except ValueError as e:
                         ignorados.append(f"Linha {idx}: {e}")
