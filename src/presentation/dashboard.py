@@ -1,6 +1,7 @@
 import customtkinter
 from presentation.forms import AlunoFrame, ProfessorFrame, CursoFrame, TurmaFrame
 from presentation.relatorio_frame import RelatorioFrame 
+from presentation.chatbot_frame import ChatBotFrame  
 
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
@@ -20,7 +21,7 @@ class App(customtkinter.CTk):
         # Sidebar
         self.sidebar_frame = customtkinter.CTkFrame(self, width=180, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, sticky="ns")
-        self.sidebar_frame.grid_rowconfigure(7, weight=1)
+        self.sidebar_frame.grid_rowconfigure(8, weight=1)
 
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Plataforma Ensino", font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
@@ -35,6 +36,8 @@ class App(customtkinter.CTk):
         self.btn_turmas.grid(row=4, column=0, padx=20, pady=10)
         self.btn_relatorio = customtkinter.CTkButton(self.sidebar_frame, text="Relatório", command=self.show_relatorio)  # Adicione este botão
         self.btn_relatorio.grid(row=5, column=0, padx=20, pady=10)  
+        self.btn_chatbot = customtkinter.CTkButton(self.sidebar_frame, text="Ajuda IA", command=self.abrir_chatbot)
+        self.btn_chatbot.grid(row=6, column=0, padx=20, pady=10)
 
         tema_frame = customtkinter.CTkFrame(self.sidebar_frame, fg_color="transparent")
         tema_frame.grid(row=7, column=0, padx=20, pady=(10, 10), sticky="ew")
@@ -81,6 +84,9 @@ class App(customtkinter.CTk):
         self.clear_main_content()
         self.current_frame = RelatorioFrame(self.main_content) 
         self.current_frame.pack(fill="both", expand=True)
+
+    def abrir_chatbot(self):
+        ChatBotFrame(self)
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
