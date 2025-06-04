@@ -81,12 +81,18 @@ class CursoFrame(customtkinter.CTkFrame):
         categoria = self.categoria_var.get()
         grau = self.grau_var.get()
         self.cursos = self.service.listar()
+        editando_id = self.editando_id
+
         if grau == "Mestrado":
             prereq_cursos = [c for c in self.cursos if c.grau == "Bacharelado" and c.categoria == categoria]
         elif grau == "Doutorado":
             prereq_cursos = [c for c in self.cursos if c.grau == "Mestrado" and c.categoria == categoria]
         else:
             prereq_cursos = []
+
+        # Remover o próprio curso da lista de possíveis pré-requisitos
+        if editando_id is not None:
+            prereq_cursos = [c for c in prereq_cursos if c.id != editando_id]
 
         for i, curso in enumerate(prereq_cursos):
             var = customtkinter.BooleanVar()
