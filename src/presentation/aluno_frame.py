@@ -212,24 +212,32 @@ class AlunoFrame(customtkinter.CTkFrame):
             return
         ignorados = []
         importados = 0
+        # Atualize a lista de turmas antes de importar
+        self.turmas = self.turma_service.listar()
+        turma_ids_existentes = {t.id for t in self.turmas}
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 for idx, line in enumerate(f, 1):
-                    # Espera: nome,matricula,email,cpf,data_nascimento,turma_id
                     campos = line.strip().split(",")
                     if len(campos) < 6:
                         ignorados.append(f"Linha {idx}: formato inválido")
                         continue
                     nome, matricula, email, cpf, data_nascimento, turma_id = campos
+                    try:
+                        turma_id_int = int(turma_id)
+                    except ValueError:
+                        ignorados.append(f"Linha {idx}: turma_id inválido")
+                        continue
+                    if turma_id_int not in turma_ids_existentes:
+                        ignorados.append(f"Linha {idx}: Turma com ID {turma_id_int} não existe.")
+                        continue
                     # Conversão da data de nascimento
                     data_nascimento_db = None
                     if data_nascimento:
                         try:
-                            # Tenta converter de DD/MM/AAAA para YYYY-MM-DD
                             dt = datetime.datetime.strptime(data_nascimento, "%d/%m/%Y")
                             data_nascimento_db = dt.strftime("%Y-%m-%d")
                         except ValueError:
-                            # Se já estiver no formato correto, tenta usar direto
                             try:
                                 dt = datetime.datetime.strptime(data_nascimento, "%Y-%m-%d")
                                 data_nascimento_db = data_nascimento
@@ -237,12 +245,12 @@ class AlunoFrame(customtkinter.CTkFrame):
                                 ignorados.append(f"Linha {idx}: Data de nascimento inválida! Use o formato DD/MM/AAAA ou YYYY-MM-DD.")
                                 continue
                     try:
-                        self.service.cadastrar(nome, matricula, email, cpf, data_nascimento_db, int(turma_id))
+                        self.service.cadastrar(nome, matricula, email, cpf, data_nascimento_db, turma_id_int)
                         importados += 1
                     except ValueError as e:
                         ignorados.append(f"Linha {idx}: {e}")
                     except Exception as e:
-                        ignorados.append(f"Linha {idx}: erro inesperado")
+                        ignorados.append(f"Linha {idx}: {e}")
             msg = f"Importação concluída!\nAlunos importados: {importados}"
             if ignorados:
                 msg += f"\n\nIgnorados:\n" + "\n".join(ignorados)
